@@ -9,8 +9,8 @@ the code, but do not explain how to find pin numbers and other board details.
 In this tutorial I try to not just show the code, but also explain how to read
 data sheets and board schematics. Those provide authoritative information that
 you need during programming. For example, we will see how the schematic shows us
-whether a LED is active-low or active-high and what pins each board peripheral
-is connected to, or what pull-up and pull-down values you need on your pins.
+whether a LED is active-low or active-high, which pins each board peripheral is
+connected to, or what pull-up and pull-down values you need on your pins.
 
 I use Mac OS X. The examples and screenshots work on my computer, but you may
 have to adapt them slightly to fit you operating system.
@@ -25,7 +25,8 @@ venerable blinky: the push button controls the speed at which the LED blinks. Th
 means we'll have to look at the schematics to find how the peripherals are
 connected and implement some kind of debounce on top of that.
 
-To write our blinky, we need to know what pins the on-board LED and push-button are connected to. Referring to the
+To write our blinky, we need to know what pins the on-board LED and push-button
+are connected to. Referring to the
 [DESPI-M02 schematic](https://www.good-display.com/companyfile/DESPI-M02-SCH-31.html),
 we can see that `LED4` is connected to pin `PE12` and that the push-button
 controls pin `PE11`.
@@ -37,9 +38,9 @@ controls pin `PE11`.
 If you take a moment to study how current would flow through the LED, you can
 see that `LED4` is connected as active-low. In our programs, we should start
 with the LED on, to shorten the apparent boot time. If you start with the LED
-pin as hugh, the LED is off for two seconds after booting the device. You may be
-left wondering if the device had been flashed properly and two seconds can
-suddenly be a long time to wait.
+pin set high, the LED is off for two seconds after booting the device. You may
+be left wondering if the device had been flashed properly. Two seconds can be a
+long time to wait if you are unsure that your program actually works.
 
 Similarly, you can see from the schematic that the push-button is active-low and
 requires a pull-up resistor to work. Electrically, the input pin is left
@@ -59,6 +60,16 @@ The schematic shows that the serial port is connected to pins `PA9` and `PA10`.
 `PA9` is the transmit (TX) pin and `PA10` is the receive pin (RX). Flow control
 is not connected, but flow control is not really critical for debug logging
 anyway.
+
+In code, we attach to the UART using DMA for trace logging. The
+[Rust Embassy framework](https://embassy.dev/) makes using DMA really easy. The
+UART peripheral configuration is statically checked with the HAL. Rust may be
+finicky to compile, but when it finally compiles you are probably mostly done.
+The schematic shows that the USB serial port is wired to `USART1`, so we use
+that in code.
+
+We now gathered enough details on the peripherals to write our blinky. See
+[src/main.rs](src/main.rs) for the full implementation.
 
 ## Target Platform Configuration
 Code done; now we have to set up the Rust toolchain to compile and ultimately
@@ -117,3 +128,41 @@ Officially, `stm32flash` is deprecated, but I found it a lot easier to install
 and use than the STM32 Cube Programmer that replaces it. Plus, `stm32flash`  is
 open source.
 
+## Serial Port Configuration
+To flash your program to the board, first set the correct serial port in
+`.cargo/config.toml`. This is done via an environment variable. That value is
+set in `.cargo/config.toml` and read in `flash.sh`.
+
+## Flashing your Program
+Now it is time to see if everything was set up correctly and works. Plug the
+DESPI-M02 into your computer using a micro-USB cable. STM32 chips enter flash
+mode when pin `boot0` is pulled high as the chip powers up. On the board
+schematic, we can see that this pin made available on header `P12`.
+
+<p align="center" width="100%">
+    <img width="50%" src="images/schematic-boot0.png">
+</p>
+
+To enter flash mode, bridge header `P12` with a jumper or anything metallic
+really, and toggle the board power with switch `P1`.
+
+<p align="center" width="100%">
+    <img width="50%" src="images/enable-flash-mode.png">
+</p>
+
+Don't forget to remove the `P12` jumper after flashing.
+
+Then run your code on the device using:
+
+```sh
+cargo run
+```
+
+If everything worked, you will see the on-board LED flashing slowly and you can
+control its speed by repeatedly pressing the red button on the board. Every time
+you press a button, a message is logged on the serial port. If you look
+carefully, you can see `LED3` flashing briefly as the bytes are transmitted.
+
+Hope this helps.
+
+--

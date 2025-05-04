@@ -5,6 +5,8 @@
 
 use core::sync::atomic::{AtomicU32, Ordering};
 use embassy_executor::Spawner;
+use embassy_stm32::usart::{Config, Uart};
+use embassy_stm32::{bind_interrupts, peripherals, usart};
 use embassy_stm32::{
     exti::ExtiInput,
     gpio::{AnyPin, Level, Output, Pin, Pull, Speed},
@@ -35,6 +37,20 @@ async fn main(spawner: Spawner) {
     BLINK_MS.store(delay_value_ms, Ordering::Relaxed);
     spawner.spawn(led_task(peripherals.PE12.degrade())).unwrap();
 
+    bind_interrupts!(struct Irqs {
+        USART1 => usart::InterruptHandler<peripherals::USART1>;
+    });
+    let mut usart = Uart::new(
+        peripherals.USART1,
+        peripherals.PA10,
+        peripherals.PA9,
+        Irqs,
+        peripherals.DMA1_CH4,
+        peripherals.DMA1_CH5,
+        Config::default(), // 115200 baud
+    )
+    .unwrap();
+
     loop {
         button.wait_for_low().await;
         delay_value_ms = delay_value_ms / 2;
@@ -42,6 +58,8 @@ async fn main(spawner: Spawner) {
             delay_value_ms = 2_000;
         }
         BLINK_MS.store(delay_value_ms, Ordering::Relaxed);
+
+        usart.write(b"changing speed...\n").await.unwrap();
 
         // debounce....
         Timer::after_millis(200).await;
