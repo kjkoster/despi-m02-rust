@@ -163,6 +163,28 @@ control its speed by repeatedly pressing the red button on the board. Every time
 you press a button, a message is logged on the serial port. If you look
 carefully, you can see `LED3` flashing briefly as the bytes are transmitted.
 
+## Optimising Binary Size
+By default, Rust compiles and links with fairly conservative optimiser settings.
+Compilation is quick, but the resulting binaries can be fairly large. On
+embedded systems, large binaries can be a problem. They may simply not fit. I
+also found that it takes quite long to flash a binary to my development board,
+hindering quick iterations.
+
+There are good resources on how to solve this, so I will not repeat them here,
+but you may want to have a look at
+[Minimizing Rust Binary Size](https://github.com/johnthagen/min-sized-rustdt). I
+took some of their advice and set up a release profile in
+[`Cargo.toml`](Cargo.toml) with optimiser flags. On my machine, this reduces the
+resultant binary from 67k to less than 8k. The link-time optimiser in particular
+seems to make a big difference.
+
+```sh
+cargo run --release
+```
+
+You can review the sizes of the binaries using a handy little tool called
+[Cargo Bloat](https://docs.rs/crate/cargo-bloat/).
+
 Hope this helps.
 
 --
