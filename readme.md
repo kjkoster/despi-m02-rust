@@ -185,6 +185,30 @@ cargo run --release
 You can review the sizes of the binaries using a handy little tool called
 [Cargo Bloat](https://docs.rs/crate/cargo-bloat/).
 
+## Power Consumption
+Having two very similar projects on the same hardware allows us to compare power
+usage per language. Embassy makes the claim that code written for Embassy is
+automatically more power efficient, because the Embassy scheduler puts the MCU
+to sleep when there is no work to be done.
+
+Measuring the Arduino busy-loop based blinky shows the board drawing about
+30&nbsp;mA. The USB power measurement dongle that I used does not work for
+choppy workloads, so the Rust based blinky actually shows up as drawing
+0&nbsp;mA. Zero current for a blinky is not possible, of course, but it does
+demonstrate that the Embassy scheduler puts the MCU to sleep when there is no
+work to be done. Nice. Easy power savings.
+
+Of course, we can also implement low power mode and sleep states in Arduino, but
+the point here is that Embassy enourages you to to use power efficient code
+where Arduino nudges you in the direction of a busy loop and thus to use more
+power.
+
+Embassy probably uses light sleep, so you can still gain more power efficiency
+by putting the system into deep sleep. Embassy cannot do that, because deep
+sleep also shuts down power to various peripherals. Without knowing the system
+use-cases, there is no way for the framework to know what is and is not being
+used.
+
 Hope this helps.
 
 --
