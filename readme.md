@@ -1,10 +1,14 @@
 # Flashing a Rust Program to the DESPI-M02
 
-Here are instructions to flashing a Rust program to the DESPI-M02. I wrote these
-because I had some trouble finding details on how to work with Rust on my
-DESPI-M02 boards. In particular, most documentation seems to assume you have a
-debug probe handy, which I do not. Board-specific examples tend to just give you
-the code, but do not explain how to find pin numbers and other board details.
+Here are instructions to flashing a Rust program to the
+[DESPI-M02 aka DESPI-1](https://www.e-paper-display.com/products_detail/productId=402.html),
+not to be confused with the newer
+[DESPI-M02L](https://www.good-display.com/product/219.html), although I suspect
+the project will apply to that board as well. I wrote these because I had some
+trouble finding details on how to work with Rust on my DESPI-M02 boards. In
+particular, most documentation seems to assume you have a debug probe handy,
+which I do not. Board-specific examples tend to just give you the code, but do
+not explain how to find pin numbers and other board details.
 
 In this tutorial I try to not just show the code, but also explain how to read
 data sheets and board schematics. Those provide authoritative information that
