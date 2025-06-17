@@ -59,7 +59,7 @@ async fn main(spawner: Spawner) {
         }
         BLINK_MS.store(delay_value_ms, Ordering::Relaxed);
 
-        usart.write(b"changing speed...\n").await.unwrap();
+        usart.write(b"changing speed...\r\n").await.unwrap();
 
         // debounce....
         Timer::after_millis(200).await;

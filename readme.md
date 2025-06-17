@@ -154,8 +154,6 @@ really, and toggle the board power with switch `P1`.
     <img width="50%" src="images/enable-flash-mode.png">
 </p>
 
-Don't forget to remove the `P12` jumper after flashing.
-
 Then run your code on the device using:
 
 ```sh
@@ -166,6 +164,22 @@ If everything worked, you will see the on-board LED flashing slowly and you can
 control its speed by repeatedly pressing the red button on the board. Every time
 you press a button, a message is logged on the serial port. If you look
 carefully, you can see `LED3` flashing briefly as the bytes are transmitted.
+
+Don't forget to remove the `P12` jumper after flashing.
+
+## Connecting a Serial Monitor
+Arduino IDE has a convenient serial monitor built-in. When using Rust, we have
+to use a command line utility instead. There are many and you probably already
+know which one to use and how. If not, my favourite is `screen` because it is
+versatile, yet can be used simply.
+
+To connect using `screen`, use the command line below:
+
+```sh
+screen /dev/cu.usbserial-110 115200
+```
+
+To exit the session, type `CTRL-A`, then `k`, confirm with `y` and `enter`.
 
 ## Optimising Binary Size
 By default, Rust compiles and links with fairly conservative optimiser settings.
